@@ -41,7 +41,7 @@ class BlogComment(models.Model):
     """ Model representing a blog comment. """
     post = models.ForeignKey('BlogPost', on_delete=models.CASCADE)
     commenter = models.ForeignKey(User, on_delete=models.CASCADE)
-    comment = models.TextField(max_length=1000, help_text='Enter the blog comment content')
+    comment = models.TextField(max_length=1000, help_text='Enter comment about blog here.')
     date_posted = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):

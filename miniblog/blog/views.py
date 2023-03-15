@@ -1,5 +1,7 @@
 from django.shortcuts import get_object_or_404, render
+from django.urls import reverse
 from django.views import generic
+from django.contrib.auth.mixins import LoginRequiredMixin
 
 from .models import BlogPost, Blogger, BlogComment
 
@@ -23,9 +25,9 @@ class BloggerListView(generic.ListView):
 class BloggerDetailView(generic.DetailView):
     model = Blogger
 
-class BlogCommentCreate(generic.CreateView):
+class BlogCommentCreateView(LoginRequiredMixin, generic.CreateView):
     model = BlogComment
-    fields = ['content', 'blogpost']
+    fields = ['comment']
 
     def form_valid(self, form):
         """
@@ -34,5 +36,15 @@ class BlogCommentCreate(generic.CreateView):
         #Add logged-in user as author of comment
         form.instance.commenter = self.request.user
         #Associate comment with blog based on passed id
-        form.instance.blog=get_object_or_404(BlogPost, pk = self.kwargs['pk'])
-        return super(BlogCommentCreate, self).form_valid(form)
+        form.instance.post=get_object_or_404(BlogPost, pk = self.kwargs['pk'])
+        return super(BlogCommentCreateView, self).form_valid(form)
+
+    def get_success_url(self):
+        return reverse('blogpost-detail', kwargs={'pk': self.kwargs['pk']})
+
+    def get_context_data(self, **kwargs):
+        # Call the base implementation first to get a context
+        context = super(BlogCommentCreateView, self).get_context_data(**kwargs)
+        # Get the blogger object from the "pk" URL parameter and add it to the context
+        context['post'] = get_object_or_404(BlogPost, pk = self.kwargs['pk'])
+        return context

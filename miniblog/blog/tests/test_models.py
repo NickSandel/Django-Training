@@ -140,3 +140,8 @@ class BlogCommentTest(TestCase):
     def test_string_representation(self):
         blogcomment = BlogComment.objects.get(id=1)
         self.assertEqual(str(blogcomment), blogcomment.comment)
+
+    def test_comment_help_text(self):
+        blogcomment = BlogComment.objects.get(id=1)
+        help_text = blogcomment._meta.get_field("comment").help_text
+        self.assertEqual(help_text, "Enter comment about blog here.")
