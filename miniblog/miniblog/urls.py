@@ -23,3 +23,14 @@ urlpatterns = [
     path('blog/', include('blog.urls')),
     path('', RedirectView.as_view(url='blog/', permanent=True)),
 ]
+
+from django.conf import settings
+from django.conf.urls.static import static
+
+urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+
+# Add Django site authentication urls (for login, logout, password management)
+
+urlpatterns += [
+    path('accounts/', include('django.contrib.auth.urls')),
+]

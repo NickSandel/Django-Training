@@ -34,23 +34,28 @@ class BloggerModelTest(TestCase):
         blogger = Blogger.objects.get(id=1)
         self.assertEqual(str(blogger), blogger.user.username)
 
+    def test_get_absolute_url(self):
+        blogger = Blogger.objects.get(id=1)
+        # This will also fail if the urlconf is not defined.
+        self.assertEqual(blogger.get_absolute_url(), "/blog/blogger/1")
+
 class BlogPostTest(TestCase):
     @classmethod
     def setUpTestData(cls):
         # Set up non-modified objects used by all test methods
         bobUser = User.objects.create_user(username="Bob", password="12345")
         bobBlogger = Blogger.objects.create(user=bobUser, bio="This is a bio")
-        BlogPost.objects.create(title="This is a title", author=bobBlogger, content="This is a content")
+        BlogPost.objects.create(title="This is a title", blogger=bobBlogger, content="This is a content")
 
     def test_title_label(self):
         blogpost = BlogPost.objects.get(id=1)
         field_label = blogpost._meta.get_field("title").verbose_name
         self.assertEqual(field_label, "title")
 
-    def test_author_label(self):
+    def test_blogger_label(self):
         blogpost = BlogPost.objects.get(id=1)
-        field_label = blogpost._meta.get_field("author").verbose_name
-        self.assertEqual(field_label, "author")
+        field_label = blogpost._meta.get_field("blogger").verbose_name
+        self.assertEqual(field_label, "blogger")
 
     def test_content_label(self):
         blogpost = BlogPost.objects.get(id=1)
@@ -86,13 +91,18 @@ class BlogPostTest(TestCase):
         blogpost = BlogPost.objects.get(id=1)
         self.assertEqual(str(blogpost), blogpost.title)
 
+    def test_get_absolute_url(self):
+        blogpost = BlogPost.objects.get(id=1)
+        # This will also fail if the urlconf is not defined.
+        self.assertEqual(blogpost.get_absolute_url(), "/blog/1")
+
 class BlogCommentTest(TestCase):
     @classmethod
     def setUpTestData(cls):
         # Set up non-modified objects used by all test methods
         bobUser = User.objects.create_user(username="Bob", password="12345")
         bobBlogger = Blogger.objects.create(user=bobUser, bio="This is a bio")
-        blogPost = BlogPost.objects.create(title="This is a title", author=bobBlogger, content="This is a content")
+        blogPost = BlogPost.objects.create(title="This is a title", blogger=bobBlogger, content="This is a content")
         sarahUser = User.objects.create_user(username="Sarah", password="12345")
         BlogComment.objects.create(post=blogPost, commenter=bobUser, comment="This is a comment from Bob")
         BlogComment.objects.create(post=blogPost, commenter=sarahUser, comment="This is a comment from Sarah")
@@ -121,3 +131,12 @@ class BlogCommentTest(TestCase):
         blogcomment = BlogComment.objects.get(id=1)
         max_length = blogcomment._meta.get_field("comment").max_length
         self.assertEqual(max_length, 1000)
+
+    def test_object_name_is_comment(self):
+        blogcomment = BlogComment.objects.get(id=1)
+        expected_object_name = f"{blogcomment.comment}"
+        self.assertEqual(expected_object_name, str(blogcomment))
+
+    def test_string_representation(self):
+        blogcomment = BlogComment.objects.get(id=1)
+        self.assertEqual(str(blogcomment), blogcomment.comment)
